@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Opciones | Laboratorios de Computo - UNITEC</title>
+    <meta charset="UTF-8">
+    <script src="js/options.js"></script>
+    <style>
+        /* General body styles */
+        body {
+            background-color: #f4f4f4; /* Light grey background for better contrast */
+            font-family: 'Arial', sans-serif;
+            margin: 16px;
+            padding: 16px;
+        }
+
+        /* Style for all label elements */
+        label {
+            color: #333; /* Dark grey color for better readability */
+            display: block;
+            margin-bottom: 10px; /* A little more space below each label */
+        }
+
+        /* Hidden elements by default */
+        #customUrlLabel {
+            display: none;
+        }
+
+        /* Style for input elements */
+        input[type='text'],
+        input[type='radio'],
+        input[type='checkbox'] {
+            margin-right: 8px;
+        }
+
+        /* Hover effect for labels to indicate interactiveness */
+        label:hover {
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* Custom styles for different types of inputs */
+        input[type='text'] {
+            border: 1px solid #ccc; /* Subtle border for the input */
+            box-sizing: border-box; /* Include padding and border in the element's width and height */
+            width: 100%; /* Full width to match container */
+            /* Adjust the padding of the input to not overlap the tick */
+            padding: 8px 30px 8px 8px; /* Spacing inside the text box */
+        }
+
+        input[type='checkbox'],
+        input[type='radio'] {
+            cursor: pointer; /* Indicate that these are clickable */
+        }
+
+        /* Modify the input border when focused */
+        input[type='text']:focus {
+            border-color: blue; /* Change border color to blue when focused */
+            outline: none; /* Remove the default focus outline */
+        }
+
+        /* Adjust the margin for container to better structure the form */
+        #optionsContainer {
+            border: 1px solid #ddd; /* Light border around options */
+            margin-top: 20px; /* Space from the top element */
+            padding: 20px; /* Spacing inside the container */
+            background-color: #fff; /* White background for the options container */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+        }
+
+        /* Styles specific to enabled checkbox */
+        #enabledLabel {
+            font-weight: bold; /* Make the 'Activate extension' bold */
+        }
+
+        /* Style for the green tick */
+        #urlSavedTick {
+            font-size: 1.5em;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        /* Style for the input container */
+        .input-container {
+            position: relative;
+        }
+
+        /* Pseudo-element for showing the tick inside the input */
+        .input-container.saved::after {
+            content: '✔';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1em;
+            color: green;
+        }
+
+        /* Modify the input border when saved */
+        .input-container.saved input[type='text'] {
+            border-color: green; /* Keep border color green if saved */
+        }
+
+        /* This is to ensure that the green border stays even after the input is focused
+           if it has been saved successfully */
+        .input-container.saved input[type='text']:focus {
+            border-color: green;
+        }
+    </style>
+</head>
+<body>
+<label id="enabledLabel">
+    <input id="enabled" type="checkbox"> Activar extensión
+</label>
+
+<div id="optionsContainer">
+    <label>
+        <input checked name="urlOption" type="radio" value="default"> Predeterminado (www.unitec.mx)
+    </label>
+    <label>
+        <input name="urlOption" type="radio" value="evaluations"> Evaluaciones Alumno (unitecsiee.com)
+    </label>
+    <label>
+        <input name="urlOption" type="radio" value="custom">URL personalizada
+    </label>
+    <label for="customUrlInput" id="customUrlLabel">Ingresa la URL:</label>
+    <div class="input-container">
+        <input disabled id="customUrlInput" placeholder="Especifique la URL" type="text">
+    </div>
+</div>
+</body>
+</html>

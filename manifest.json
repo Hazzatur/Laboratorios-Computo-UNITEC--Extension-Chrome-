@@ -1,26 +1,37 @@
 {
   "manifest_version": 3,
-  "name": "Laboratorios de computo - UNITEC",
+  "name": "Laboratorios de Computo - UNITEC",
   "short_name": "LCU",
-  "description": "Laboratorios de computo - UNITEC",
-  "version": "1.0",
+  "description": "Laboratorios de Computo - UNITEC",
+  "version": "1.1.0",
   "action": {
     "default_icon": {
       "16": "images/icon16.png",
       "24": "images/icon24.png",
       "32": "images/icon32.png"
     },
-    "default_popup": "popup/popup.html"
+    "default_title": "Abrir pestaña en modo incógnito, \ntambién puedes usar Alt+O"
   },
-  "options_page": "options/options.html",
+  "options_page": "options.html",
   "chrome_url_overrides": {
-    "newtab": "redirect/redirect.html"
+    "newtab": "main.html"
   },
   "permissions": [
-    "tabs",
+    "activeTab",
+    "contextMenus",
     "management",
     "storage"
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+O"
+      }
+    }
+  },
   "icons": {
     "16": "images/icon16.png",
     "32": "images/icon32.png",
@@ -28,5 +39,6 @@
     "128": "images/icon128.png"
   },
   "incognito": "split",
-  "minimum_chrome_version": "89"
+  "minimum_chrome_version": "89",
+  "offline_enabled": true
 }
