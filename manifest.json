@@ -3,7 +3,7 @@
   "name": "Laboratorios de Computo - UNITEC",
   "short_name": "LCU",
   "description": "Laboratorios de Computo - UNITEC",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "action": {
     "default_icon": {
       "16": "images/icon16.png",
@@ -19,7 +19,6 @@
   "permissions": [
     "activeTab",
     "contextMenus",
-    "management",
     "storage"
   ],
   "background": {

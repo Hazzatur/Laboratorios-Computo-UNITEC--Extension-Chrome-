@@ -11,42 +11,33 @@ document.addEventListener('DOMContentLoaded', function () {
     const customUrlInput = document.getElementById('customUrlInput');
     const customUrlLabel = document.getElementById('customUrlLabel');
 
-    let urlOption;
-    let labsUrl;
-    let defaultUrl;
-    let evaluationsUrl;
-    let customUrl;
-
-    chrome.storage.sync.get(['enabled', 'urlOption', 'labsUrl', 'defaultUrl', 'evaluationsUrl', 'customUrl'], function (data) {
+    chrome.storage.sync.get(['enabled', 'urlOption', 'customUrl'], function (data) {
         const enabledValue = data.enabled === undefined ? true : data.enabled;
         chrome.storage.sync.set({enabled: enabledValue});
         checkbox.checked = enabledValue;
 
         const urlOptionValue = !!data.urlOption ? data.urlOption : UrlOption.DEFAULT;
         chrome.storage.sync.set({urlOption: urlOptionValue});
-        urlOption = urlOptionValue;
-        labsUrl = data.labsUrl;
-        defaultUrl = data.defaultUrl;
-        evaluationsUrl = data.evaluationsUrl;
 
         const customUrlValue = !!data.customUrl ? data.customUrl : '';
         chrome.storage.sync.set({customUrl: customUrlValue});
-        customUrl = customUrlValue;
 
         optionsContainer.style.display = checkbox.checked ? 'block' : 'none';
 
         for (let i = 0; i < urlOptions.length; i++) {
-            urlOptions[i].checked = urlOptions[i].value === urlOption;
+            urlOptions[i].checked = urlOptions[i].value === urlOptionValue;
         }
 
-        setUrl(urlOption);
+        setUrl(urlOptionValue);
     });
 
     checkbox.addEventListener('change', function () {
         chrome.storage.sync.set({enabled: checkbox.checked});
         optionsContainer.style.display = checkbox.checked ? 'block' : 'none';
         if (checkbox.checked) {
-            setUrl(urlOption);
+            chrome.storage.sync.get(['urlOption'], function (data) {
+                setUrl(data.urlOption);
+            });
         }
     });
 
@@ -76,7 +67,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.querySelector('.input-container').classList.remove('saved');
             }, 3000);
         });
-        customUrl = customUrlInput.value;
         setUrl(UrlOption.CUSTOM)
     }
 
@@ -93,6 +83,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function toggleCustomUrlField(urlOption) {
+        let customUrl;
+        chrome.storage.sync.get(['customUrl'], function (data) {
+            customUrl = data.customUrl;
+        });
+
         customUrlInput.value = urlOption === UrlOption.CUSTOM ? customUrl : '';
         customUrlInput.disabled = urlOption !== UrlOption.CUSTOM;
         customUrlInput.style.display = urlOption === UrlOption.CUSTOM ? 'block' : 'none';
@@ -105,17 +100,27 @@ document.addEventListener('DOMContentLoaded', function () {
         let url;
         switch (urlOption) {
             case UrlOption.DEFAULT:
-                url = defaultUrl;
+                chrome.storage.sync.get(['defaultUrl'], function (data) {
+                    url = data.defaultUrl;
+                });
                 break;
             case UrlOption.EVALUATIONS:
-                url = evaluationsUrl;
+                chrome.storage.sync.get(['evaluationsUrl'], function (data) {
+                    url = data.evaluationsUrl;
+                });
                 break;
             case UrlOption.CUSTOM:
-                customUrlInput.value = customUrl;
-                url = customUrl !== '' ? formatUrl(customUrl) : '';
+                let customUrl;
+                chrome.storage.sync.get(['customUrl'], function (data) {
+                    customUrl = data.customUrl;
+                });
+                customUrlInput.value = !!customUrl ? customUrl : '';
+                url = !!customUrl ? formatUrl(customUrl) : '';
                 break;
             default:
-                url = labsUrl;
+                chrome.storage.sync.get(['labsUrl'], function (data) {
+                    url = data.labsUrl;
+                });
                 break;
         }
         chrome.storage.sync.set({setUrl: url});
