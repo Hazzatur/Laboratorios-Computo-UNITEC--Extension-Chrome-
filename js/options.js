@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const customUrlInput = document.getElementById('customUrlInput');
     const customUrlLabel = document.getElementById('customUrlLabel');
 
-    chrome.storage.sync.get(['enabled', 'urlOption', 'customUrl'], function (data) {
+    chrome.storage.sync.get(['enabled', 'urlOption', 'customUrl']).then((data) => {
         const enabledValue = data.enabled === undefined ? true : data.enabled;
         chrome.storage.sync.set({enabled: enabledValue});
         checkbox.checked = enabledValue;
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
         chrome.storage.sync.set({enabled: checkbox.checked});
         optionsContainer.style.display = checkbox.checked ? 'block' : 'none';
         if (checkbox.checked) {
-            chrome.storage.sync.get(['urlOption'], function (data) {
+            chrome.storage.sync.get(['urlOption']).then((data) => {
                 setUrl(data.urlOption);
             });
         }
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
     customUrlInput.addEventListener('blur', saveCustomUrl);
 
     function saveCustomUrl() {
-        chrome.storage.sync.set({customUrl: customUrlInput.value}, function () {
+        chrome.storage.sync.set({customUrl: customUrlInput.value}).then(() => {
             // Add the 'saved' class to the container of the input to show the tick
             document.querySelector('.input-container').classList.add('saved');
             // Remove the 'saved' class after a few seconds
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function toggleCustomUrlField(urlOption) {
         let customUrl;
-        chrome.storage.sync.get(['customUrl'], function (data) {
+        chrome.storage.sync.get(['customUrl']).then((data) => {
             customUrl = data.customUrl;
         });
 
@@ -95,34 +95,31 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function setUrl(urlOption) {
-        toggleCustomUrlField(urlOption)
+        toggleCustomUrlField(urlOption);
 
-        let url;
         switch (urlOption) {
             case UrlOption.DEFAULT:
-                chrome.storage.sync.get(['defaultUrl'], function (data) {
-                    url = data.defaultUrl;
+                chrome.storage.sync.get(['defaultUrl']).then((data) => {
+                    chrome.storage.sync.set({setUrl: data.defaultUrl})
                 });
                 break;
             case UrlOption.EVALUATIONS:
-                chrome.storage.sync.get(['evaluationsUrl'], function (data) {
-                    url = data.evaluationsUrl;
+                chrome.storage.sync.get(['evaluationsUrl']).then((data) => {
+                    chrome.storage.sync.set({setUrl: data.evaluationsUrl})
                 });
                 break;
             case UrlOption.CUSTOM:
-                let customUrl;
-                chrome.storage.sync.get(['customUrl'], function (data) {
-                    customUrl = data.customUrl;
+                chrome.storage.sync.get(['customUrl']).then((data) => {
+                    let customUrl = data.customUrl;
+                    customUrlInput.value = !!customUrl ? customUrl : '';
+                    chrome.storage.sync.set({setUrl: !!customUrl ? formatUrl(customUrl) : ''})
                 });
-                customUrlInput.value = !!customUrl ? customUrl : '';
-                url = !!customUrl ? formatUrl(customUrl) : '';
                 break;
             default:
-                chrome.storage.sync.get(['labsUrl'], function (data) {
-                    url = data.labsUrl;
+                chrome.storage.sync.get(["labsUrl"]).then((data) => {
+                    chrome.storage.sync.set({setUrl: data.labsUrl})
                 });
                 break;
         }
-        chrome.storage.sync.set({setUrl: url});
     }
 });

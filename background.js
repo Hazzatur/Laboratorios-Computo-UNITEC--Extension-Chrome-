@@ -15,7 +15,7 @@ chrome.runtime.onInstalled.addListener(function (details) {
 
 // Icon click
 chrome.action.onClicked.addListener(function (tab) {
-    chrome.storage.sync.get(['enabled'], function (data) {
+    chrome.storage.sync.get(['enabled']).then((data) => {
         if (data.enabled) {
             openInIncognito({menuItemId: OPEN}, tab);
         } else {
@@ -41,7 +41,7 @@ chrome.contextMenus.create(
     });
 
 function openInIncognito(info, tab) {
-    chrome.storage.sync.get(['setUrl', 'defaultUrl'], function (data) {
+    chrome.storage.sync.get(['setUrl', 'defaultUrl']).then((data) => {
         let url = tab.url;
         if (checkChromeUrl(url)) {
             url = data.setUrl || data.defaultUrl;
