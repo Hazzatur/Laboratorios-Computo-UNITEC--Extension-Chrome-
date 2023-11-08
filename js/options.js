@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const UrlOption = {
         DEFAULT: 'default',
         EVALUATIONS: 'evaluations',
+        LABS: 'labs',
         CUSTOM: 'custom'
     }
 
@@ -10,8 +11,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const urlOptions = document.getElementsByName('urlOption');
     const customUrlInput = document.getElementById('customUrlInput');
     const customUrlLabel = document.getElementById('customUrlLabel');
+    const iconOptions = document.getElementsByName('iconOption');
+    const addCustomUrlButton = document.getElementById('addCustomUrlButton');
 
-    chrome.storage.sync.get(['enabled', 'urlOption', 'customUrl']).then((data) => {
+    chrome.storage.sync.get(['enabled', 'urlOption', 'customUrl', 'iconUrls', 'customIconUrls']).then((data) => {
         const enabledValue = data.enabled === undefined ? true : data.enabled;
         chrome.storage.sync.set({enabled: enabledValue});
         checkbox.checked = enabledValue;
@@ -22,10 +25,27 @@ document.addEventListener('DOMContentLoaded', function () {
         const customUrlValue = !!data.customUrl ? data.customUrl : '';
         chrome.storage.sync.set({customUrl: customUrlValue});
 
+        const iconUrlsValue = data.iconUrls || [];
+        chrome.storage.sync.set({iconUrls: iconUrlsValue});
+
+        const customIconUrlsValue = data.customIconUrls || [];
+        chrome.storage.sync.set({customIconUrls: customIconUrlsValue});
+
         optionsContainer.style.display = checkbox.checked ? 'block' : 'none';
 
         for (let i = 0; i < urlOptions.length; i++) {
             urlOptions[i].checked = urlOptions[i].value === urlOptionValue;
+        }
+
+        for (let i = 0; i < iconOptions.length; i++) {
+            iconOptions[i].checked = data.iconUrls[i].enabled;
+        }
+
+        for (let i = 0; i < customIconUrlsValue.length; i++) {
+            const {url, enabled} = customIconUrlsValue[i];
+            const {checkbox, input} = createCustomUrlComponent(i, enabled);
+            checkbox.checked = enabled;
+            input.value = url;
         }
 
         setUrl(urlOptionValue);
@@ -49,6 +69,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    for (let i = 0; i < iconOptions.length; i++) {
+        iconOptions[i].addEventListener('change', function () {
+            chrome.storage.sync.get(['iconUrls']).then((data) => {
+                data.iconUrls[i].enabled = iconOptions[i].checked;
+                chrome.storage.sync.set({iconUrls: data.iconUrls});
+            });
+        });
+    }
+
     customUrlInput.addEventListener('keydown', function (event) {
         if (event.key === 'Enter') {
             event.preventDefault();
@@ -57,6 +86,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     customUrlInput.addEventListener('blur', saveCustomUrl);
+
+    addCustomUrlButton.addEventListener('click', addCustomUrl);
 
     function saveCustomUrl() {
         chrome.storage.sync.set({customUrl: customUrlInput.value}).then(() => {
@@ -115,11 +146,121 @@ document.addEventListener('DOMContentLoaded', function () {
                     chrome.storage.sync.set({setUrl: !!customUrl ? formatUrl(customUrl) : ''})
                 });
                 break;
+            case UrlOption.LABS:
             default:
                 chrome.storage.sync.get(["labsUrl"]).then((data) => {
                     chrome.storage.sync.set({setUrl: data.labsUrl})
                 });
                 break;
         }
+    }
+
+    function createCustomUrlComponent(index, isEnabled = true) {
+        const container = document.createElement('div');
+        container.classList.add('custom-url-container');
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `customUrlEnabled-${index}`;
+        checkbox.checked = isEnabled;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = `customUrl-${index}`;
+        input.placeholder = 'Especifique la URL';
+        input.disabled = !isEnabled;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = '✖';
+        deleteButton.classList.add('delete-custom-url');
+        deleteButton.id = `deleteCustomUrl-${index}`; // Set unique ID for each delete button
+        deleteButton.type = 'button'; // Ensure this button does not submit forms
+        deleteButton.title = 'Eliminar URL';
+
+        container.appendChild(checkbox);
+        container.appendChild(input);
+        container.appendChild(deleteButton);
+
+        checkbox.addEventListener('change', function () {
+            input.disabled = !checkbox.checked;
+            saveCustomIconUrls(index, input.value, checkbox.checked);
+        });
+
+        deleteButton.addEventListener('click', function () {
+            removeCustomUrl(index, container);
+        });
+
+        input.addEventListener('blur', function () {
+            if (input.value) {
+                const url = formatUrl(input.value);
+                saveCustomIconUrls(index, url, checkbox.checked);
+            }
+        });
+
+        input.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (input.value) {
+                    const url = formatUrl(input.value);
+                    saveCustomIconUrls(index, url, checkbox.checked);
+                }
+            }
+        });
+
+        const optionsContainer = document.getElementById('optionsContainer');
+        optionsContainer.appendChild(container);
+
+        return {checkbox, input, deleteButton};
+    }
+
+    function saveCustomIconUrls(index, url, enabled) {
+        chrome.storage.sync.get(['customIconUrls'], function (data) {
+            const customIconUrls = data.customIconUrls || [];
+
+            // Expand the array to the new index if necessary
+            while (index >= customIconUrls.length) {
+                customIconUrls.push({url: '', enabled: false});
+            }
+
+            // Update the entry
+            customIconUrls[index] = {url, enabled};
+
+            // Save the updated array back to storage
+            chrome.storage.sync.set({customIconUrls: customIconUrls}, function () {
+                if (chrome.runtime.lastError) {
+                    console.error('Error saving custom icon URLs:', chrome.runtime.lastError);
+                } else {
+                    console.log('Custom icon URLs saved successfully.');
+                }
+            });
+        });
+        location.reload();
+    }
+
+    function addCustomUrl() {
+        const customUrlComponents = document.querySelectorAll('.custom-url-container').length;
+        createCustomUrlComponent(customUrlComponents);
+    }
+
+    function removeCustomUrl(index, container) {
+        chrome.storage.sync.get(['customIconUrls'], function (data) {
+            const customIconUrls = data.customIconUrls || [];
+            if (customIconUrls[index]) {
+                // Remove the URL from the array
+                customIconUrls.splice(index, 1);
+
+                // Save the updated array back to storage
+                chrome.storage.sync.set({customIconUrls: customIconUrls}, function () {
+                    if (chrome.runtime.lastError) {
+                        console.error('Error removing custom icon URL:', chrome.runtime.lastError);
+                    } else {
+                        console.log('Custom icon URL removed successfully.');
+                        // Remove the container from the DOM
+                        container.remove();
+                    }
+                });
+            }
+        });
+        location.reload();
     }
 });

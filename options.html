@@ -21,7 +21,8 @@
         }
 
         /* Hidden elements by default */
-        #customUrlLabel {
+        #customUrlLabel,
+        #iconCustomUrlLabel {
             display: none;
         }
 
@@ -105,6 +106,69 @@
         .input-container.saved input[type='text']:focus {
             border-color: green;
         }
+
+        header {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        #bottomHeader {
+            margin-top: 20px;
+        }
+
+        /* Styles for the custom URL container */
+        .custom-url-container {
+            display: flex;
+            align-items: center;
+            margin: 10px;
+        }
+
+        .custom-url-container input[type='text'] {
+            flex-grow: 1;
+            margin-left: 8px;
+        }
+
+        /* Style for the add URL button */
+        #addCustomUrlButton {
+            background-color: rgb(2, 110, 183); /* Blue background */
+            border: none; /* No border */
+            color: white; /* White text */
+            padding: 10px 10px; /* Top and bottom padding 10px, left and right padding 20px */
+            text-align: center; /* Centered text */
+            text-decoration: none; /* No underline */
+            display: inline-block; /* Allows setting dimensions */
+            font-size: 16px; /* Slightly larger font size */
+            margin: 10px 2px; /* Margin around the button */
+            cursor: pointer; /* Cursor to indicate it's clickable */
+            border-radius: 5px; /* Rounded corners */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+            transition-duration: 0.4s; /* Smooth transition for hover effect */
+        }
+
+        /* Hover effect for the add URL button */
+        #addCustomUrlButton:hover {
+            background-color: rgb(5, 80, 130); /* Darker blue background on hover */
+        }
+
+        /* Plus icon for the add URL button */
+        #addCustomUrlButton::before {
+            content: '+';
+            display: inline-block;
+            margin-right: 5px; /* Space between the icon and the text */
+        }
+
+        /* Style for the delete custom URL button */
+        .delete-custom-url {
+            margin-left: 5px;
+            color: red;
+            border: none;
+            background: none;
+            cursor: pointer;
+            padding: 0; /* Remove padding for consistency */
+            font-size: 1em; /* Match the font size with other elements or adjust as needed */
+            line-height: 1; /* Align the button vertically with the text input */
+        }
     </style>
 </head>
 <body>
@@ -113,11 +177,15 @@
 </label>
 
 <div id="optionsContainer">
+    <header>Configurar nueva pestaña:</header>
     <label>
-        <input checked name="urlOption" type="radio" value="default"> Predeterminado (www.unitec.mx)
+        <input name="urlOption" type="radio" value="default"> Predeterminado (www.unitec.mx)
     </label>
     <label>
-        <input name="urlOption" type="radio" value="evaluations"> Evaluaciones Alumno (unitecsiee.com)
+        <input name="urlOption" type="radio" value="evaluations"> Evaluación Docente (unitecsiee.com)
+    </label>
+    <label>
+        <input name="urlOption" type="radio" value="labs"> Laboratorios de Computo (labcomputounitec.wixsite.com/home)
     </label>
     <label>
         <input name="urlOption" type="radio" value="custom">URL personalizada
@@ -126,6 +194,15 @@
     <div class="input-container">
         <input disabled id="customUrlInput" placeholder="Especifique la URL" type="text">
     </div>
+
+    <header id="bottomHeader">Configurar icono:</header>
+    <label>
+        <input id="evaluations" name="iconOption" type="checkbox"> Evaluación Docente (unitecsiee.com)
+    </label>
+    <label>
+        <input id="nps" name="iconOption" type="checkbox"> NPS
+    </label>
+    <button id="addCustomUrlButton">Agregar URL personalizada</button>
 </div>
 </body>
 </html>
